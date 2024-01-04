@@ -3,7 +3,7 @@ import mist from '@mistjs/eslint-config'
 export default mist({
   vue: true,
   vueJsx: false,
-  typescript: true,
+  typescript: false,
   gitignore: true,
   markdown: true,
   ignores: [

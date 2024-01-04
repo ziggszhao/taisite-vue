@@ -3,9 +3,18 @@ import type { RouteRecordRaw } from 'vue-router'
 import { omit } from 'lodash'
 import { basicRouteMap, getRouterModule } from './router-modules'
 import type { MenuData, MenuDataItem } from '~@/layouts/basic-layout/typing'
-import dynamicRoutes, { ROOT_ROUTE_REDIRECT_PATH } from '~@/router/dynamic-routes'
+// import dynamicRoutes, { ROOT_ROUTE_REDIRECT_PATH } from '~@/router/dynamic-routes'
 import { i18n } from '~@/locales'
+export const ROOT_ROUTE_REDIRECT_PATH = '/monitor'
+const Layout = () => import('~/layouts/index.vue')
 
+export const rootRoute: RouteRecordRaw = {
+  path: '/',
+  name: 'rootPath',
+  redirect: ROOT_ROUTE_REDIRECT_PATH,
+  component: Layout,
+  children: [],
+}
 let cache_key = 1
 
 const getCacheKey = () => `Cache_Key_${cache_key++}`
@@ -137,18 +146,18 @@ export function generateTreeRoutes(menus: MenuData) {
   }
 }
 
-/**
- * 通过前端数据中的dynamic-routes动态生成菜单和数据
- */
-
-export async function generateRoutes() {
-  const menuData = genRoutes(dynamicRoutes)
-
-  return {
-    menuData,
-    routeData: dynamicRoutes,
-  }
-}
+// /**
+//  * 通过前端数据中的dynamic-routes动态生成菜单和数据
+//  */
+//
+// export async function generateRoutes() {
+//   const menuData = genRoutes(dynamicRoutes)
+//
+//   return {
+//     menuData,
+//     routeData: dynamicRoutes,
+//   }
+// }
 
 function checkComponent(component: RouteRecordRaw['component']) {
   for (const componentKey in basicRouteMap) {

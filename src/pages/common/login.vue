@@ -1,22 +1,21 @@
-<script setup lang="ts">
+<script setup>
 import { AlipayCircleFilled, LockOutlined, MobileOutlined, TaobaoCircleFilled, UserOutlined, WeiboCircleFilled } from '@ant-design/icons-vue'
 import { delayTimer } from '@v-c/utils'
 import { AxiosError } from 'axios'
 import GlobalLayoutFooter from '~/layouts/components/global-footer/index.vue'
-import { loginApi } from '~/api/common/login'
+import { loginApi } from '@/api/common/login'
 import { getQueryParam } from '~/utils/tools'
-import type { LoginMobileParams, LoginParams } from '~@/api/common/login'
 import pageBubble from '@/utils/page-bubble'
+import { notification } from 'ant-design-vue';
 
 const message = useMessage()
-const notification = useNotification()
 const appStore = useAppStore()
 const { layoutSetting } = storeToRefs(appStore)
 const router = useRouter()
 const token = useAuthorization()
 const loginModel = reactive({
-  username: undefined,
-  password: undefined,
+  nickName: 'admin',
+  userPassword: '123456',
   mobile: undefined,
   code: undefined,
   type: 'account',
@@ -28,7 +27,7 @@ const codeLoading = shallowRef(false)
 const resetCounter = 60
 const submitLoading = shallowRef(false)
 const errorAlert = shallowRef(false)
-const bubbleCanvas = ref<HTMLCanvasElement>()
+const bubbleCanvas = ref()
 const { counter, pause, reset, resume, isActive } = useInterval(1000, {
   controls: true,
   immediate: false,
@@ -59,34 +58,60 @@ async function submit() {
   submitLoading.value = true
   try {
     await formRef.value?.validate()
-    let params: LoginParams | LoginMobileParams
+    let params=undefined;
 
     if (loginModel.type === 'account') {
       params = {
-        username: loginModel.username,
-        password: loginModel.password,
-      } as unknown as LoginParams
+        nickName: loginModel.nickName,
+        userPassword: loginModel.userPassword,
+        type:loginModel.type,
+      }
     }
     else {
       params = {
         mobile: loginModel.mobile,
         code: loginModel.code,
         type: 'mobile',
-      } as unknown as LoginMobileParams
+      }
     }
-    const { data } = await loginApi(params)
-    token.value = data?.token
-    notification.success({
-      message: '登录成功',
-      description: '欢迎回来！',
-      duration: 3,
-    })
-    // 获取当前是否存在重定向的链接，如果存在就走重定向的地址
-    const redirect = getQueryParam('redirect', '/')
-    router.push({
-      path: redirect,
-      replace: true,
-    })
+    const {success, data } = await loginApi(params)
+    if(success){
+      token.value = data.accessToken
+      notification.success({
+        message: '登录成功',
+        description: '欢迎回来！',
+        duration: 3,
+      })
+      // 获取当前是否存在重定向的链接，如果存在就走重定向的地址
+      const redirect = getQueryParam('redirect', '/')
+      await router.push({
+        path: redirect,
+        replace: true,
+      })
+    }
+    else{
+      errorAlert.value = true
+      submitLoading.value = false
+    }
+
+    // loginApi(params).then(async response => {
+    //   if (response.success) {
+    //     token.value = response.data.accessToken
+    //     notification.success({
+    //       message: '登录成功',
+    //       description: '欢迎回来！',
+    //       duration: 3,
+    //     })
+    //     // 获取当前是否存在重定向的链接，如果存在就走重定向的地址
+    //     const redirect = getQueryParam('redirect', '/')
+    //     await router.push({
+    //       path: redirect,
+    //       replace: true,
+    //     })
+    //   }else{
+    //     submitLoading.value = false
+    //   }
+    // })
   }
   catch (e) {
     if (e instanceof AxiosError)
@@ -97,7 +122,7 @@ async function submit() {
 }
 onMounted(async () => {
   await delayTimer(300)
-  pageBubble.init(unref(bubbleCanvas)!)
+  pageBubble.init(unref(bubbleCanvas))
 })
 
 onBeforeUnmount(() => {
@@ -114,23 +139,23 @@ onBeforeUnmount(() => {
       <div class="ant-pro-form-login-main rounded">
         <!-- 登录头部 -->
         <div
-          class="flex-between h-15 px-4 mb-[2px]"
+            class="flex-between h-15 px-4 mb-[2px]"
         >
           <div class="flex-end">
             <span class="ant-pro-form-login-logo">
               <img w-full h-full object-cover src="/logo.svg">
             </span>
             <span class="ant-pro-form-login-title">
-              Antdv Pro
+              Taisite
             </span>
             <span class="ant-pro-form-login-desc">
-              {{ t("pages.layouts.userLayout.title") }}
+              Taisite 是一个基于Vue 3.0的测试平台
             </span>
           </div>
           <div class="login-lang flex-center relative z-11">
             <span
-              class="flex-center cursor-pointer text-16px"
-              @click="appStore.toggleTheme(layoutSetting.theme === 'dark' ? 'light' : 'dark')"
+                class="flex-center cursor-pointer text-16px"
+                @click="appStore.toggleTheme(layoutSetting.theme === 'dark' ? 'light' : 'dark')"
             >
               <!-- 亮色和暗黑模式切换按钮 -->
               <template v-if="layoutSetting.theme === 'light'">
@@ -140,7 +165,7 @@ onBeforeUnmount(() => {
                 <carbon-sun />
               </template>
             </span>
-            <SelectLang />
+            <!-- <SelectLang /> -->
           </div>
         </div>
         <a-divider m-0 />
@@ -154,38 +179,38 @@ onBeforeUnmount(() => {
           <!-- 登录框右侧 -->
           <div class="ant-pro-form-login-main-right px-5 w-[335px] flex-center flex-col relative z-11">
             <div class="text-center py-6 text-2xl">
-              {{ t('pages.login.tips') }}
+              欢迎使用 Taisite 测试平台
             </div>
             <a-form ref="formRef" :model="loginModel">
               <a-tabs v-model:activeKey="loginModel.type" centered>
-                <a-tab-pane key="account" :tab="t('pages.login.accountLogin.tab')" />
-                <a-tab-pane key="mobile" :tab="t('pages.login.phoneLogin.tab')" />
+                <a-tab-pane key="account" tab="账号密码登录" />
+                <a-tab-pane key="mobile" tab="手机号登录" />
               </a-tabs>
               <!-- 判断是否存在error -->
               <a-alert
-                v-if="errorAlert && loginModel.type === 'account'" mb-24px
-                :message="t('pages.login.accountLogin.errorMessage')" type="error" show-icon
+                  v-if="errorAlert && loginModel.type === 'account'" mb-24px
+                  message="错误的用户名和密码" type="error" show-icon
               />
               <a-alert
-                v-if="errorAlert && loginModel.type === 'mobile'" mb-24px
-                :message="t('pages.login.phoneLogin.errorMessage')" type="error" show-icon
+                  v-if="errorAlert && loginModel.type === 'mobile'" mb-24px
+                  :message="t('pages.login.phoneLogin.errorMessage')" type="error" show-icon
               />
               <template v-if="loginModel.type === 'account'">
-                <a-form-item name="username" :rules="[{ required: true, message: t('pages.login.username.required') }]">
+                <a-form-item name="nickName" :rules="[{ required: true, message: t('pages.login.username.required') }]">
                   <a-input
-                    v-model:value="loginModel.username" allow-clear
-                    autocomplete="off"
-                    :placeholder="t('pages.login.username.placeholder')" size="large" @press-enter="submit"
+                      v-model:value="loginModel.nickName" allow-clear
+                      autocomplete="off"
+                      :placeholder="t('pages.login.username.placeholder')" size="large" @press-enter="submit"
                   >
                     <template #prefix>
                       <UserOutlined />
                     </template>
                   </a-input>
                 </a-form-item>
-                <a-form-item name="password" :rules="[{ required: true, message: t('pages.login.password.required') }]">
+                <a-form-item name="userPassword" :rules="[{ required: true, message: t('pages.login.password.required') }]">
                   <a-input-password
-                    v-model:value="loginModel.password" allow-clear
-                    :placeholder="t('pages.login.password.placeholder')" size="large" @press-enter="submit"
+                      v-model:value="loginModel.userPassword" allow-clear
+                      :placeholder="t('pages.login.password.placeholder')" size="large" @press-enter="submit"
                   >
                     <template #prefix>
                       <LockOutlined />
@@ -195,7 +220,7 @@ onBeforeUnmount(() => {
               </template>
               <template v-if="loginModel.type === 'mobile'">
                 <a-form-item
-                  name="mobile" :rules="[
+                    name="mobile" :rules="[
                     { required: true, message: t('pages.login.phoneNumber.required') },
                     {
                       pattern: /^(86)?1([38][0-9]|4[579]|5[0-35-9]|6[6]|7[0135678]|9[89])[0-9]{8}$/,
@@ -204,8 +229,8 @@ onBeforeUnmount(() => {
                   ]"
                 >
                   <a-input
-                    v-model:value="loginModel.mobile" allow-clear
-                    :placeholder="t('pages.login.phoneNumber.placeholder')" size="large" @press-enter="submit"
+                      v-model:value="loginModel.mobile" allow-clear
+                      :placeholder="t('pages.login.phoneNumber.placeholder')" size="large" @press-enter="submit"
                   >
                     <template #prefix>
                       <MobileOutlined />
@@ -215,9 +240,9 @@ onBeforeUnmount(() => {
                 <a-form-item name="code" :rules="[{ required: true, message: t('pages.login.captcha.required') }]">
                   <div flex items-center>
                     <a-input
-                      v-model:value="loginModel.code"
-                      style="flex: 1 1 0%; transition: width 0.3s ease 0s; margin-right: 8px;" allow-clear
-                      :placeholder="t('pages.login.captcha.placeholder')" size="large" @press-enter="submit"
+                        v-model:value="loginModel.code"
+                        style="flex: 1 1 0%; transition: width 0.3s ease 0s; margin-right: 8px;" allow-clear
+                        :placeholder="t('pages.login.captcha.placeholder')" size="large" @press-enter="submit"
                     >
                       <template #prefix>
                         <LockOutlined />
@@ -258,7 +283,7 @@ onBeforeUnmount(() => {
     </div>
     <div py-24px px-50px fixed bottom-0 z-11 w-screen :data-theme="layoutSetting.theme" text-14px>
       <GlobalLayoutFooter
-        :copyright="layoutSetting.copyright" icp="鲁ICP备2023021414号-2"
+          :copyright="layoutSetting.copyright" icp="苏ICP备2023035009号-1"
       >
         <template #renderFooterLinks>
           <footer-links />

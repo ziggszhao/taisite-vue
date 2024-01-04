@@ -47,7 +47,7 @@ export const useLayoutMenu = defineStore('layout-menu', () => {
 
   const { menuData } = storeToRefs(userStore)
   const handleAccordionMode = (innerOpenKeys: string[]) => {
-    const rootSubmenuKeys: string[] | undefined = menuData.value?.map((item) => {
+    const rootSubmenuKeys: string[] | undefined = menuData.value?.map((item:any) => {
       return item.path
     })
     const intersection = innerOpenKeys.filter(value => openKeys.value?.includes(value))

@@ -1,20 +1,21 @@
-import { logoutApi } from '~@/api/common/login'
-import { getRouteMenusApi } from '~@/api/common/menu'
-import type { UserInfo } from '~@/api/common/user'
-import { getUserInfoApi } from '~@/api/common/user'
-import type { MenuData } from '~@/layouts/basic-layout/typing'
-import { rootRoute } from '~@/router/dynamic-routes'
-import { generateFlatRoutes, generateRoutes, generateTreeRoutes } from '~@/router/generate-route'
+import { logoutApi } from '@/api/common/login'
+import { getRouteMenusApi } from '~/api/common/menu.js'
+import { getUserInfoApi } from '@/api/common/user'
+// import { rootRoute } from '~@/router/dynamic-routes'
+import { rootRoute,generateFlatRoutes, generateTreeRoutes } from '~@/router/generate-route'
 import { DYNAMIC_LOAD_WAY, DynamicLoadEnum } from '~@/utils/constant'
 
 export const useUserStore = defineStore('user', () => {
   const routerData = shallowRef()
-  const menuData = shallowRef<MenuData>([])
-  const userInfo = shallowRef<UserInfo>()
+  const menuData = shallowRef([])
+  const userInfo = shallowRef()
   const token = useAuthorization()
-  const avatar = computed(() => userInfo.value?.avatar)
-  const nickname = computed(() => userInfo.value?.nickname ?? userInfo.value?.username)
-  const roles = computed(() => userInfo.value?.roles)
+  const userAvatar = computed(() => userInfo.value?.userAvatar)
+  const nickName = computed(() => userInfo.value?.nickName ?? userInfo.value?.userName)
+
+
+
+
 
   const getMenuRoutes = async () => {
     const { data } = await getRouteMenusApi()
@@ -38,32 +39,33 @@ export const useUserStore = defineStore('user', () => {
   const getUserInfo = async () => {
     // 获取用户信息
     const { data } = await getUserInfoApi()
-    userInfo.value = data
+    userInfo.value=data
+    userInfo.value.userAvatar=userInfo.value.userAvatar+'?'+ Math.random()
   }
+
 
   const logout = async () => {
     // 退出登录
     // 1. 清空用户信息
     try {
       await logoutApi()
+      userInfo.value = null
     }
     finally {
       token.value = null
-      userInfo.value = undefined
       routerData.value = undefined
       menuData.value = []
     }
   }
 
   return {
+    nickName,
+    userAvatar,
     userInfo,
-    roles,
     getUserInfo,
     logout,
     routerData,
     menuData,
     generateDynamicRoutes,
-    avatar,
-    nickname,
   }
 })

@@ -1,13 +1,13 @@
 import type { LayoutSetting } from '~@/stores/app'
 
 export default {
-  title: 'Antdv Pro',
+  title: 'Taisite测试平台',
   theme: 'light',
   logo: '/logo.svg',
   collapsed: false,
   drawerVisible: false,
   colorPrimary: '#1677FF',
-  layout: 'mix',
+  layout: 'side',
   contentWidth: 'Fluid',
   fixedHeader: false,
   fixedSider: true,
@@ -20,12 +20,12 @@ export default {
   colorWeak: false,
   multiTab: true,
   multiTabFixed: false,
-  keepAlive: true,
+  keepAlive: false,
   accordionMode: false,
   leftCollapsed: true,
-  compactAlgorithm: false,
+  compactAlgorithm: true,
   headerHeight: 48,
-  copyright: 'Antdv Pro Team 2023',
+  copyright: 'ziggs.zhao个人出品 2024',
   animationName: 'slide-fadein-right',
 } as LayoutSetting
 
