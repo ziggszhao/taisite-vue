@@ -1,12 +1,25 @@
 <script setup>
 import {onBeforeMount} from 'vue';
-import {queryEnvWithProjectIdApi, updateEnvApi, insertEnvApi} from '~/api/auto-test/env.js';
+import {
+  queryAnyEnvWithProjectIdApi,
+  updateEnvApi,
+  insertEnvApi,
+  changeEnvStatusApi,
+  deleteEnvApi
+} from '~/api/auto-test/env.js';
 import nameValue from '@/pages/auto-test/components/name-value.vue'
+import projectSelect from '@/pages/auto-test/components/project-select.vue'
 import {message} from 'ant-design-vue';
+import {useProjectStore} from "~/stores/project.js";
+
 
 onBeforeMount(() => {
-  getEnvInfoData()
+  if (projectStore.selectProjectId) {
+    queryEnvInfoParameter.value.projectId = projectStore.selectProjectId
+    getEnvInfoData()
+  }
 })
+
 
 const columns = [
   {
@@ -71,13 +84,21 @@ const columns = [
     width: 200
   },
 ];
+const projectStore = useProjectStore()
+projectStore.$subscribe((mutate, state) => {
+  queryEnvInfoParameter.value.projectId = state.selectProjectId
+  getEnvInfoData()
+})
 const envFormRef = ref();
 let envInfoData = ref([])
 let envInfoViewData = ref([])
 let envInfoRequestParameters = ref({})
 let modalType = ref(1)
 let queryEnvInfoParameter = ref({
-  projectId: 1
+  projectId: undefined
+})
+let actionEnvInfoParameter = ref({
+  envId: undefined
 })
 const activeKey = ref('1');
 let showModal = ref(false)
@@ -90,10 +111,36 @@ let searchInput = ref('')
 async function getEnvInfoData() {
   try {
     // 发请求
-    const {success, data} = await queryEnvWithProjectIdApi(queryEnvInfoParameter.value)
+    const {success, data} = await queryAnyEnvWithProjectIdApi(queryEnvInfoParameter.value)
     if (success) {
       envInfoData.value = data
       envInfoViewData.value = data
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+async function changeEnvStatus(envId) {
+  actionEnvInfoParameter.value.envId = envId
+  try {
+    // 发请求
+    const {success} = await changeEnvStatusApi(actionEnvInfoParameter.value)
+    if (success) {
+      await getEnvInfoData()
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+async function deleteEnv(envId) {
+  actionEnvInfoParameter.value.envId = envId
+  try {
+    // 发请求
+    const {success} = await deleteEnvApi(actionEnvInfoParameter.value)
+    if (success) {
+      await getEnvInfoData()
     }
   } catch (error) {
     console.log(error)
@@ -180,13 +227,13 @@ const checkName = async (_rule, value) => {
 };
 
 function search() {
-  envInfoViewData.value=envInfoData.value.filter(item =>
-    item.envName.toLowerCase().includes(searchInput.value.toLowerCase())
+  envInfoViewData.value = envInfoData.value.filter(item =>
+      item.envName.toLowerCase().includes(searchInput.value.toLowerCase())
   )
 }
 
-function clearSearchInput(){
-  searchInput.value=''
+function clearSearchInput() {
+  searchInput.value = ''
 }
 
 
@@ -210,7 +257,8 @@ function clearSearchInput(){
           <template v-if="column.key === 'status'">
                         <span>
                             <a-switch v-model:checked="record.status" checked-children="启用" :checkedValue='0'
-                                      un-checked-children="停用" :unheckedValue='1'/>
+                                      un-checked-children="停用" :unheckedValue='1'
+                                      @change="changeEnvStatus(record.envId)"/>
                         </span>
           </template>
           <template v-if="column.key === 'createdBy'">
@@ -227,7 +275,14 @@ function clearSearchInput(){
                         <span>
                             <a @click="updateModal(record)">编辑</a>
                             <a-divider type="vertical"/>
+                           <a-popconfirm
+                               title="确认删除？"
+                               ok-text="确认"
+                               cancel-text="取消"
+                               @confirm="deleteEnv(record.envId)"
+                           >
                             <a>删除</a>
+                             </a-popconfirm>
                         </span>
           </template>
         </template>

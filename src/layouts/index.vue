@@ -12,6 +12,7 @@ import {
   WechatOutlined
 } from '@ant-design/icons-vue';
 import GlobalLayoutFooter from '~/layouts/components/global-footer/index.vue'
+import projectSelect from "~/pages/auto-test/components/project-select.vue";
 
 defineOptions({
   name: 'ProLayout',
@@ -96,6 +97,7 @@ const layoutProps = computed(() =>
                :header-height="layoutSetting.headerHeight" @update:open-keys="layoutMenu.handleOpenKeys"
                @update:selected-keys="layoutMenu.handleSelectedKeys" @update:collapsed="appStore.toggleCollapsed">
     <template #headerActions>
+      <projectSelect/>
       <a-tooltip placement="bottom">
         <template #title>
           <span>切换模式</span>
@@ -191,7 +193,7 @@ const layoutProps = computed(() =>
     <template #renderFooterLinks/>
 
     <a-watermark h-full flex flex-col flex-1
-                 :content="!layoutSetting.watermark ? '' : 'taisite.codecareer.cn' ?? layoutSetting.title">
+                 :content="!layoutSetting.watermark ? '' : 'ziggs.zhao' ?? layoutSetting.title">
       <RouterView>
         <template #default="{ Component }">
           <component :is="Component"/>

@@ -20,7 +20,7 @@ export default {
   colorWeak: false,
   multiTab: true,
   multiTabFixed: false,
-  keepAlive: false,
+  keepAlive: true,
   accordionMode: false,
   leftCollapsed: true,
   compactAlgorithm: true,

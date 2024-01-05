@@ -285,9 +285,9 @@ onBeforeUnmount(() => {
       <GlobalLayoutFooter
           :copyright="layoutSetting.copyright" icp="苏ICP备2023035009号-1"
       >
-        <template #renderFooterLinks>
-          <footer-links />
-        </template>
+<!--        <template #renderFooterLinks>-->
+<!--          <footer-links />-->
+<!--        </template>-->
       </GlobalLayoutFooter>
     </div>
   </div>

@@ -69,7 +69,7 @@ request.interceptors.request.use((config) => {
   }
   else {
     //  替换url的请求前缀baseUrl
-    config.baseURL = import.meta.env.VITE_APP_BASE_API_DEV
+    config.baseURL = import.meta.env.VITE_APP_BASE_URL
   }
   const { loading } = config
   // 如果 token 存在
