@@ -29,6 +29,7 @@ const visibleModal = ref<boolean>(false)
 const visiblePopover = ref<boolean>(false);
 const rateValue = ref<number>(5)
 const flag: Ref<boolean | null> = ref(false)
+const isDEV=ref<boolean>(import.meta.env.DEV)
 
 function showModal() {
   visibleModal.value = true
@@ -156,7 +157,7 @@ const layoutProps = computed(() =>
     </template>
     <template #contentPrefix>
       <MultiTab v-if="layoutSetting.multiTab"/>
-      <a-popover v-model:open="visiblePopover" trigger="click" placement="topRight" arrow-point-at-center>
+      <a-popover v-if="!isMobile" v-model:open="visiblePopover" trigger="click" placement="topRight" arrow-point-at-center>
         <template #title>
           <div style="text-align: center;">
             <span>非常需要您对本站的评价</span>
@@ -206,7 +207,8 @@ const layoutProps = computed(() =>
       </GlobalLayoutFooter>
     </a-watermark>
   </BasicLayout>
-  <SettingDrawer v-model:open="layoutSetting.drawerVisible" :t="t" :theme="layoutSetting.theme"
+  <SettingDrawer v-if="isDEV"
+                v-model:open="layoutSetting.drawerVisible" :t="t" :theme="layoutSetting.theme"
                  :color-primary="layoutSetting.colorPrimary" :color-weak="layoutSetting.colorWeak"
                  :multi-tab="layoutSetting.multiTab"
                  :multi-tab-fixed="layoutSetting.multiTabFixed" :animation-name-list="animationNameList"

@@ -10,6 +10,7 @@ import {useUserStore} from "~/stores/user.js";
 
 onBeforeMount(() => {
   getUserInfo()
+  baseUrl.value=import.meta.env.VITE_APP_BASE_URL
 })
 
 // 获取
@@ -26,14 +27,7 @@ const selectedKeys = ref('1')
 const formRef = ref()
 const labelCol = {span: 0}
 const wrapperCol = {span: 13}
-// const formState = reactive({
-//   userId: userInfo.userId,
-//   nickName: userInfo.nickName,
-//   userName: userInfo.userName,
-//   userDescription: userInfo.userDescription,
-//   userGender: userInfo.userGender
-// })
-
+const baseUrl=ref('')
 const rules = {
   nickName: [
     {required: true, message: '请输入花名', trigger: 'change'},
@@ -180,7 +174,8 @@ function handleChange(info) {
                       </a-avatar>
                       <a-upload name="file" :headers="headers" :max-count="1" :before-upload="beforeUpload"
                                 @change="handleChange"
-                                action="http://127.0.0.1:9999/api/user/uploadUserAvatar" :show-upload-list="false">
+                                :action="baseUrl+'/api/user/uploadUserAvatar'"
+                                :show-upload-list="false">
                         <a-button class="mt-4">
                           <UploadOutlined/>
                           上传头像

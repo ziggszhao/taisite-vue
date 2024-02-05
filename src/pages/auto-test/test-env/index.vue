@@ -1,3 +1,107 @@
+<template>
+  <div>
+    <a-card :bordered="true">
+      <a-space>
+        <a-input
+            ref="searchInputRef"
+            placeholder="请输入项目名称查询"
+            allow-clear
+            v-model:value="searchInput"
+            @change="search"/>
+        <a-button ref="insertButtonRef" type="primary" @click="insertModal">新增环境</a-button>
+      </a-space>
+    </a-card>
+    <a-card :bordered="true">
+      <a-table ref="envTableRef" :columns="columns" :data-source="envInfoViewData" :pagination="pagination">
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'status'">
+                        <span>
+                            <a-switch v-model:checked="record.status" checked-children="启用" :checkedValue='0'
+                                      un-checked-children="停用" :unheckedValue='1'
+                                      @change="changeEnvStatus(record.envId)"/>
+                        </span>
+          </template>
+          <template v-if="column.key === 'createdBy'">
+                        <span>
+                            {{ record.createdBy.nickName }}
+                        </span>
+          </template>
+          <template v-if="column.key === 'updatedBy'">
+                        <span>
+                            {{ record.updatedBy.nickName }}
+                        </span>
+          </template>
+          <template v-if="column.key === 'action'">
+                        <span>
+                            <a @click="updateModal(record)">编辑</a>
+                            <a-divider type="vertical"/>
+                           <a-popconfirm
+                               title="确认删除？"
+                               ok-text="确认"
+                               cancel-text="取消"
+                               @confirm="deleteEnv(record.envId)"
+                           >
+                            <a>删除</a>
+                             </a-popconfirm>
+                        </span>
+          </template>
+        </template>
+      </a-table>
+    </a-card>
+
+    <a-modal v-if="showModal" v-model:open="showModal" title="环境配置" style="width: 800px" @ok="actionEnv"
+             okText="保存">
+      <a-form
+          ref="envFormRef"
+          :model="envInfoRequestParameters"
+          :label-col="{ span: 3 }"
+          :wrapper-col="{ span: 16 }"
+      >
+        <a-form-item
+            label="环境名称："
+            name="envName"
+            :rules="[
+            { validator: checkName, trigger: 'change'}
+            ]"
+        >
+          <a-input v-model:value="envInfoRequestParameters.envName"/>
+        </a-form-item>
+        <a-tabs v-model:activeKey="activeKey">
+          <a-tab-pane key="1" tab="HTTP配置">
+            <div style="margin-left: 10px;margin-right: 10px">
+              <div style="font-size: 16px;font-weight: bold;">环境信息</div>
+              <a-form-item
+                  label="环境域名："
+                  name="envUrl"
+                  :rules="[
+            { validator: checkUrl, trigger: 'change'}
+            ]"
+              >
+                <a-input v-model:value="envInfoRequestParameters.envUrl"/>
+              </a-form-item>
+              <a-form-item
+                  label="环境描述："
+                  name="envDescription"
+              >
+                <a-input v-model:value="envInfoRequestParameters.envDescription"/>
+              </a-form-item>
+            </div>
+            <nameValue :nameValueInfo="envInfoRequestParameters.envHeader" name="请求头：" source='headersEdit'/>
+          </a-tab-pane>
+          <a-tab-pane key="2" tab="通用配置">
+            <nameValue :nameValueInfo="envInfoRequestParameters.envParameters" name="请求参数："
+                       source='envParametersEdit'/>
+          </a-tab-pane>
+          <a-tab-pane key="3" tab="数据库配置">
+            <a-result title="努力建设中..." sub-title="请再给我一点点时间..."/>
+          </a-tab-pane>
+        </a-tabs>
+      </a-form>
+    </a-modal>
+    <a-tour v-model:current="current" :open="tourOpen" :steps="steps" @close="handleTourOpen(false)" />
+  </div>
+</template>
+
 <script setup>
 import {onBeforeMount} from 'vue';
 import {
@@ -8,18 +112,9 @@ import {
   deleteEnvApi
 } from '~/api/auto-test/env.js';
 import nameValue from '@/pages/auto-test/components/name-value.vue'
-import projectSelect from '@/pages/auto-test/components/project-select.vue'
 import {message} from 'ant-design-vue';
-import {useProjectStore} from "~/stores/project.js";
-
-
-onBeforeMount(() => {
-  if (projectStore.selectProjectId) {
-    queryEnvInfoParameter.value.projectId = projectStore.selectProjectId
-    getEnvInfoData()
-  }
-})
-
+import {useTourHistory} from "~/composables/tour-history.js";
+import {useRoute} from "vue-router";
 
 const columns = [
   {
@@ -84,11 +179,12 @@ const columns = [
     width: 200
   },
 ];
-const projectStore = useProjectStore()
-projectStore.$subscribe((mutate, state) => {
-  queryEnvInfoParameter.value.projectId = state.selectProjectId
-  getEnvInfoData()
-})
+
+let selectProjectId = useSelectProjectId()
+watch(() => selectProjectId, (newValue, oldValue) => {
+  queryEnvInfoParameter.value.projectId = newValue
+  getEnvInfoData(1)
+}, {deep: true})
 const envFormRef = ref();
 let envInfoData = ref([])
 let envInfoViewData = ref([])
@@ -236,115 +332,49 @@ function clearSearchInput() {
   searchInput.value = ''
 }
 
-
-</script>
-
-<template>
-  <div>
-    <a-card :bordered="true">
-      <a-space>
-        <a-input
-            placeholder="请输入项目名称查询"
-            allow-clear
-            v-model:value="searchInput"
-            @change="search"/>
-        <a-button type="primary" @click="insertModal">新增环境</a-button>
-      </a-space>
-    </a-card>
-    <a-card :bordered="true">
-      <a-table :columns="columns" :data-source="envInfoViewData" :pagination="pagination">
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'status'">
-                        <span>
-                            <a-switch v-model:checked="record.status" checked-children="启用" :checkedValue='0'
-                                      un-checked-children="停用" :unheckedValue='1'
-                                      @change="changeEnvStatus(record.envId)"/>
-                        </span>
-          </template>
-          <template v-if="column.key === 'createdBy'">
-                        <span>
-                            {{ record.createdBy.nickName }}
-                        </span>
-          </template>
-          <template v-if="column.key === 'updatedBy'">
-                        <span>
-                            {{ record.updatedBy.nickName }}
-                        </span>
-          </template>
-          <template v-if="column.key === 'action'">
-                        <span>
-                            <a @click="updateModal(record)">编辑</a>
-                            <a-divider type="vertical"/>
-                           <a-popconfirm
-                               title="确认删除？"
-                               ok-text="确认"
-                               cancel-text="取消"
-                               @confirm="deleteEnv(record.envId)"
-                           >
-                            <a>删除</a>
-                             </a-popconfirm>
-                        </span>
-          </template>
-        </template>
-      </a-table>
-    </a-card>
-
-    <a-modal v-if="showModal" v-model:open="showModal" title="环境配置" style="width: 800px" @ok="actionEnv"
-             okText="保存">
-      <a-form
-          ref="envFormRef"
-          :model="envInfoRequestParameters"
-          :label-col="{ span: 3 }"
-          :wrapper-col="{ span: 16 }"
-      >
-        <a-form-item
-            label="环境名称："
-            name="envName"
-            :rules="[
-            { validator: checkName, trigger: 'change'}
-            ]"
-        >
-          <a-input v-model:value="envInfoRequestParameters.envName"/>
-        </a-form-item>
-        <a-tabs v-model:activeKey="activeKey">
-          <a-tab-pane key="1" tab="HTTP配置">
-            <div style="margin-left: 10px;margin-right: 10px">
-              <div style="font-size: 16px;font-weight: bold;">环境信息</div>
-              <a-form-item
-                  label="环境域名："
-                  name="envUrl"
-                  :rules="[
-            { validator: checkUrl, trigger: 'change'}
-            ]"
-              >
-                <a-input v-model:value="envInfoRequestParameters.envUrl"/>
-              </a-form-item>
-              <a-form-item
-                  label="环境描述："
-                  name="envDescription"
-              >
-                <a-input v-model:value="envInfoRequestParameters.envDescription"/>
-              </a-form-item>
-            </div>
-            <nameValue :nameValueInfo="envInfoRequestParameters.envHeader" name="请求头："/>
-          </a-tab-pane>
-          <a-tab-pane key="2" tab="通用配置">
-            <nameValue :nameValueInfo="envInfoRequestParameters.envParameters" name="请求参数："/>
-          </a-tab-pane>
-          <a-tab-pane key="3" tab="数据库配置">敬请期待</a-tab-pane>
-        </a-tabs>
-      </a-form>
-    </a-modal>
-  </div>
-</template>
+const route = useRoute()
+let tourHistory = useTourHistory()
+let insertButtonRef=ref()
+let searchInputRef=ref()
+let envTableRef=ref()
+let tourOpen=ref(false)
+let current = ref(0)
+const steps = [
+  {
+    title: '查找环境',
+    description: '在此输入查找环境.',
+    target: () => searchInputRef.value && searchInputRef.value.$el,
+  },
+  {
+    title: '新增环境',
+    description: '点击新增环境.',
+    target: () => insertButtonRef.value && insertButtonRef.value.$el,
+  },
+  {
+    title: '环境列表',
+    description: '所有环境都展示在表格内.',
+    target: () => envTableRef.value && envTableRef.value.$el,
+  }
+]
 
 
-<style scoped>
-.trend-container2 {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  min-height: 900px;
-  padding-bottom: 0px;
+function handleTourOpen(val){
+  if(val){
+    if(!tourHistory.value.includes(route.name)){
+      tourOpen.value=true
+      tourHistory.value.push(route.name)
+    }
+  }
+  else{
+    tourOpen.value = val;
+  }
 }
-</style>
+
+onBeforeMount(() => {
+  if (selectProjectId.value) {
+    queryEnvInfoParameter.value.projectId = selectProjectId.value
+    getEnvInfoData()
+  }
+  handleTourOpen(true)
+})
+</script>

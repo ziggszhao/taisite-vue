@@ -3,7 +3,7 @@
 // import { AccessEnum } from '~@/utils/constant'
 //
 // export const ROOT_ROUTE_REDIRECT_PATH = '/monitor'
-// const Layout = () => import('~/layouts/index.vue')
+// const Layout = () => import('~/layouts/case-list.vue')
 //
 // export const rootRoute: RouteRecordRaw = {
 //   path: '/',
@@ -27,7 +27,7 @@
 //       {
 //         path: '/dashboard/analysis',
 //         name: 'DashboardAnalysis',
-//         component: () => import('~/pages/dashboard/analysis/index.vue'),
+//         component: () => import('~/pages/dashboard/analysis/case-list.vue'),
 //         meta: {
 //           title: '分析页',
 //         },
@@ -35,7 +35,7 @@
 //       {
 //         path: '/dashboard/monitor',
 //         name: 'DashboardMonitor',
-//         component: () => import('~/pages/dashboard/monitor/index.vue'),
+//         component: () => import('~/pages/dashboard/monitor/case-list.vue'),
 //         meta: {
 //           title: '监控页',
 //         },
@@ -43,7 +43,7 @@
 //       {
 //         path: '/dashboard/workplace',
 //         name: 'DashboardWorkplace',
-//         component: () => import('~/pages/dashboard/workplace/index.vue'),
+//         component: () => import('~/pages/dashboard/workplace/case-list.vue'),
 //         meta: {
 //           title: '监控页',
 //         },
@@ -63,7 +63,7 @@
 //       {
 //         path: '/form/basic-form',
 //         name: 'FormBasic',
-//         component: () => import('~/pages/form/basic-form/index.vue'),
+//         component: () => import('~/pages/form/basic-form/case-list.vue'),
 //         meta: {
 //           title: '基础表单',
 //           locale: 'menu.form.basic-form',
@@ -72,7 +72,7 @@
 //       {
 //         path: '/form/step-form',
 //         name: 'FormStep',
-//         component: () => import('~/pages/form/step-form/index.vue'),
+//         component: () => import('~/pages/form/step-form/case-list.vue'),
 //         meta: {
 //           title: '分步表单',
 //           locale: 'menu.form.step-form',
@@ -81,7 +81,7 @@
 //       {
 //         path: '/form/advanced-form',
 //         name: 'FormAdvanced',
-//         component: () => import('~/pages/form/advanced-form/index.vue'),
+//         component: () => import('~/pages/form/advanced-form/case-list.vue'),
 //         meta: {
 //           title: '高级表单',
 //           locale: 'menu.form.advanced-form',
@@ -195,7 +195,7 @@
 //       {
 //         path: '/profile/basic',
 //         name: 'ProfileBasic',
-//         component: () => import('~/pages/profile/basic/index.vue'),
+//         component: () => import('~/pages/profile/basic/case-list.vue'),
 //         meta: {
 //           title: 'menu.profile.basic',
 //           locale: 'menu.profile.basic',
@@ -352,7 +352,7 @@
 //       {
 //         path: '/list/search-list',
 //         name: 'SearchList',
-//         component: () => import('~/pages/list/search-list/index.vue'),
+//         component: () => import('~/pages/list/search-list/case-list.vue'),
 //         meta: {
 //           title: '搜索列表',
 //           locale: 'menu.list.search-list',

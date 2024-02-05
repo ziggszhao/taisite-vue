@@ -5,14 +5,6 @@ import {message, Upload} from 'ant-design-vue';
 
 let {userInfo,getUserInfo} = defineProps(['userInfo','getUserInfo'])
 
-onBeforeMount(() => {
-  console.log(userInfo)
-  // formState.userId = userInfo.userId
-  // formState.nickName = userInfo.nickName
-  // formState.userName = userInfo.userName
-  // formState.userDescription = userInfo.userDescription
-  // formState.userGender = userInfo.userGender
-})
 
 // 获取
 const userStore = useUserStore()

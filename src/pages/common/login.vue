@@ -1,16 +1,23 @@
 <script setup>
-import { AlipayCircleFilled, LockOutlined, MobileOutlined, TaobaoCircleFilled, UserOutlined, WeiboCircleFilled } from '@ant-design/icons-vue'
-import { delayTimer } from '@v-c/utils'
-import { AxiosError } from 'axios'
+import {
+  AlipayCircleFilled,
+  LockOutlined,
+  MobileOutlined,
+  TaobaoCircleFilled,
+  UserOutlined,
+  WeiboCircleFilled
+} from '@ant-design/icons-vue'
+import {delayTimer} from '@v-c/utils'
+import {AxiosError} from 'axios'
 import GlobalLayoutFooter from '~/layouts/components/global-footer/index.vue'
-import { loginApi } from '@/api/common/login'
-import { getQueryParam } from '~/utils/tools'
+import {loginApi} from '@/api/common/login'
+import {getQueryParam} from '~/utils/tools'
 import pageBubble from '@/utils/page-bubble'
-import { notification } from 'ant-design-vue';
+import {notification} from 'ant-design-vue';
 
 const message = useMessage()
 const appStore = useAppStore()
-const { layoutSetting } = storeToRefs(appStore)
+const {layoutSetting} = storeToRefs(appStore)
 const router = useRouter()
 const token = useAuthorization()
 const loginModel = reactive({
@@ -21,14 +28,14 @@ const loginModel = reactive({
   type: 'account',
   remember: true,
 })
-const { t } = useI18nLocale()
+const {t} = useI18nLocale()
 const formRef = shallowRef()
 const codeLoading = shallowRef(false)
 const resetCounter = 60
 const submitLoading = shallowRef(false)
 const errorAlert = shallowRef(false)
 const bubbleCanvas = ref()
-const { counter, pause, reset, resume, isActive } = useInterval(1000, {
+const {counter, pause, reset, resume, isActive} = useInterval(1000, {
   controls: true,
   immediate: false,
   callback(count) {
@@ -38,6 +45,7 @@ const { counter, pause, reset, resume, isActive } = useInterval(1000, {
     }
   },
 })
+
 async function getCode() {
   codeLoading.value = true
   try {
@@ -48,8 +56,7 @@ async function getCode() {
       codeLoading.value = false
       message.success('验证码是：123456')
     }, 3000)
-  }
-  catch (error) {
+  } catch (error) {
     codeLoading.value = false
   }
 }
@@ -58,24 +65,23 @@ async function submit() {
   submitLoading.value = true
   try {
     await formRef.value?.validate()
-    let params=undefined;
+    let params = undefined;
 
     if (loginModel.type === 'account') {
       params = {
         nickName: loginModel.nickName,
         userPassword: loginModel.userPassword,
-        type:loginModel.type,
+        type: loginModel.type,
       }
-    }
-    else {
+    } else {
       params = {
         mobile: loginModel.mobile,
         code: loginModel.code,
         type: 'mobile',
       }
     }
-    const {success, data } = await loginApi(params)
-    if(success){
+    const {success, data} = await loginApi(params)
+    if (success) {
       token.value = data.accessToken
       notification.success({
         message: '登录成功',
@@ -88,8 +94,7 @@ async function submit() {
         path: redirect,
         replace: true,
       })
-    }
-    else{
+    } else {
       errorAlert.value = true
       submitLoading.value = false
     }
@@ -112,14 +117,14 @@ async function submit() {
     //     submitLoading.value = false
     //   }
     // })
-  }
-  catch (e) {
+  } catch (e) {
     if (e instanceof AxiosError)
       errorAlert.value = true
 
     submitLoading.value = false
   }
 }
+
 onMounted(async () => {
   await delayTimer(300)
   pageBubble.init(unref(bubbleCanvas))
@@ -133,7 +138,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="login-container">
     <div h-screen w-screen absolute z-10>
-      <canvas ref="bubbleCanvas" />
+      <canvas ref="bubbleCanvas"/>
     </div>
     <div class="login-content flex-center">
       <div class="ant-pro-form-login-main rounded">
@@ -159,23 +164,23 @@ onBeforeUnmount(() => {
             >
               <!-- 亮色和暗黑模式切换按钮 -->
               <template v-if="layoutSetting.theme === 'light'">
-                <carbon-moon />
+                <carbon-moon/>
               </template>
               <template v-else>
-                <carbon-sun />
+                <carbon-sun/>
               </template>
             </span>
             <!-- <SelectLang /> -->
           </div>
         </div>
-        <a-divider m-0 />
+        <a-divider m-0/>
         <!-- 登录主体 -->
         <div class="box-border flex min-h-[520px]">
           <!-- 登录框左侧 -->
           <div class="ant-pro-form-login-main-left min-h-[520px] flex-center  bg-[var(--bg-color-container)]">
             <img src="@/assets/images/login-left.png" class="h-5/6 w-5/6">
           </div>
-          <a-divider m-0 type="vertical" class="ant-pro-login-divider  min-h-[520px]" />
+          <a-divider m-0 type="vertical" class="ant-pro-login-divider  min-h-[520px]"/>
           <!-- 登录框右侧 -->
           <div class="ant-pro-form-login-main-right px-5 w-[335px] flex-center flex-col relative z-11">
             <div class="text-center py-6 text-2xl">
@@ -183,8 +188,8 @@ onBeforeUnmount(() => {
             </div>
             <a-form ref="formRef" :model="loginModel">
               <a-tabs v-model:activeKey="loginModel.type" centered>
-                <a-tab-pane key="account" tab="账号密码登录" />
-                <a-tab-pane key="mobile" tab="手机号登录" />
+                <a-tab-pane key="account" tab="账号密码登录"/>
+                <a-tab-pane key="mobile" tab="手机号登录"/>
               </a-tabs>
               <!-- 判断是否存在error -->
               <a-alert
@@ -196,64 +201,66 @@ onBeforeUnmount(() => {
                   :message="t('pages.login.phoneLogin.errorMessage')" type="error" show-icon
               />
               <template v-if="loginModel.type === 'account'">
-                <a-form-item name="nickName" :rules="[{ required: true, message: t('pages.login.username.required') }]">
-                  <a-input
-                      v-model:value="loginModel.nickName" allow-clear
-                      autocomplete="off"
-                      :placeholder="t('pages.login.username.placeholder')" size="large" @press-enter="submit"
-                  >
-                    <template #prefix>
-                      <UserOutlined />
-                    </template>
-                  </a-input>
-                </a-form-item>
-                <a-form-item name="userPassword" :rules="[{ required: true, message: t('pages.login.password.required') }]">
-                  <a-input-password
-                      v-model:value="loginModel.userPassword" allow-clear
-                      :placeholder="t('pages.login.password.placeholder')" size="large" @press-enter="submit"
-                  >
-                    <template #prefix>
-                      <LockOutlined />
-                    </template>
-                  </a-input-password>
-                </a-form-item>
+                <div style="width: 295px">
+                  <a-form-item name="nickName" :rules="[{ required: true, message: '用户名是必填项！' }]">
+                    <a-input
+                        v-model:value="loginModel.nickName" allow-clear
+                        autocomplete="off"
+                        placeholder="用户名: admin" size="large" @press-enter="submit"
+                    >
+                      <template #prefix>
+                        <UserOutlined/>
+                      </template>
+                    </a-input>
+                  </a-form-item>
+                  <a-form-item name="userPassword" :rules="[{ required: true, message: '密码是必填项！' }]">
+                    <a-input-password
+                        v-model:value="loginModel.userPassword" allow-clear
+                        placeholder="密码: 123456" size="large" @press-enter="submit"
+                    >
+                      <template #prefix>
+                        <LockOutlined/>
+                      </template>
+                    </a-input-password>
+                  </a-form-item>
+                </div>
               </template>
               <template v-if="loginModel.type === 'mobile'">
                 <a-form-item
                     name="mobile" :rules="[
-                    { required: true, message: t('pages.login.phoneNumber.required') },
+                    { required: true, message: '手机号是必填项！' },
                     {
                       pattern: /^(86)?1([38][0-9]|4[579]|5[0-35-9]|6[6]|7[0135678]|9[89])[0-9]{8}$/,
-                      message: t('pages.login.phoneNumber.invalid'),
+                      message: '不合法的手机号！',
                     },
                   ]"
                 >
                   <a-input
                       v-model:value="loginModel.mobile" allow-clear
-                      :placeholder="t('pages.login.phoneNumber.placeholder')" size="large" @press-enter="submit"
+                      placeholder="请输入手机号！" size="large" @press-enter="submit"
                   >
                     <template #prefix>
-                      <MobileOutlined />
+                      <MobileOutlined/>
                     </template>
                   </a-input>
                 </a-form-item>
-                <a-form-item name="code" :rules="[{ required: true, message: t('pages.login.captcha.required') }]">
+                <a-form-item name="code" :rules="[{ required: true, message: '验证码是必填项！' }]">
                   <div flex items-center>
                     <a-input
                         v-model:value="loginModel.code"
                         style="flex: 1 1 0%; transition: width 0.3s ease 0s; margin-right: 8px;" allow-clear
-                        :placeholder="t('pages.login.captcha.placeholder')" size="large" @press-enter="submit"
+                        placeholder="请输入验证码！" size="large" @press-enter="submit"
                     >
                       <template #prefix>
-                        <LockOutlined />
+                        <LockOutlined/>
                       </template>
                     </a-input>
-                    <a-button :loading="codeLoading" :disabled="isActive" size="large" @click="getCode">
+                    <a-button :loading="codeLoading" :disabled="isActive" size="middle" @click="getCode">
                       <template v-if="!isActive">
-                        {{ t('pages.login.phoneLogin.getVerificationCode') }}
+                        获取验证码
                       </template>
                       <template v-else>
-                        {{ resetCounter - counter }} {{ t('pages.getCaptchaSecondText') }}
+                        {{ resetCounter - counter }} 秒后重新获取
                       </template>
                     </a-button>
                   </div>
@@ -261,22 +268,22 @@ onBeforeUnmount(() => {
               </template>
               <div class="mb-24px flex-between">
                 <a-checkbox v-model:checked="loginModel.remember">
-                  {{ t('pages.login.rememberMe') }}
+                  自动登录
                 </a-checkbox>
-                <a>{{ t('pages.login.forgotPassword') }}</a>
+                <a>忘记密码</a>
               </div>
               <a-button type="primary" block :loading="submitLoading" size="large" @click="submit">
-                {{ t('pages.login.submit') }}
+                登录
               </a-button>
             </a-form>
-            <a-divider>
-              <span class="text-slate-500">{{ t('pages.login.loginWith') }}</span>
-            </a-divider>
-            <div class="ant-pro-form-login-other">
-              <AlipayCircleFilled class="icon" />
-              <TaobaoCircleFilled class="icon" />
-              <WeiboCircleFilled class="icon" />
-            </div>
+            <!--            <a-divider>-->
+            <!--              <span class="text-slate-500">其他登录方式 :</span>-->
+            <!--            </a-divider>-->
+            <!--            <div class="ant-pro-form-login-other">-->
+            <!--              <AlipayCircleFilled class="icon" />-->
+            <!--              <TaobaoCircleFilled class="icon" />-->
+            <!--              <WeiboCircleFilled class="icon" />-->
+            <!--            </div>-->
           </div>
         </div>
       </div>
@@ -285,9 +292,9 @@ onBeforeUnmount(() => {
       <GlobalLayoutFooter
           :copyright="layoutSetting.copyright" icp="苏ICP备2023035009号-1"
       >
-<!--        <template #renderFooterLinks>-->
-<!--          <footer-links />-->
-<!--        </template>-->
+        <!--        <template #renderFooterLinks>-->
+        <!--          <footer-links />-->
+        <!--        </template>-->
       </GlobalLayoutFooter>
     </div>
   </div>
@@ -362,7 +369,7 @@ onBeforeUnmount(() => {
 
 }
 
-.ant-pro-form-login-main{
+.ant-pro-form-login-main {
   box-shadow: var(--c-shadow);
 }
 
@@ -378,35 +385,40 @@ onBeforeUnmount(() => {
     color: var(--pro-ant-color-primary);
   }
 }
+
 .login-media(@width:100%) {
-  .ant-pro-form-login-main{
+  .ant-pro-form-login-main {
     width: @width;
   }
-  .ant-pro-form-login-main-left{
+  .ant-pro-form-login-main-left {
     display: none;
   }
-  .ant-pro-form-login-main-right{
+  .ant-pro-form-login-main-right {
     width: 100%;
   }
-  .ant-pro-form-login-desc{
+  .ant-pro-form-login-desc {
     display: none;
   }
 }
-@media (min-width : 992px) {
-  .ant-pro-form-login-main-left{
+
+@media (min-width: 992px) {
+  .ant-pro-form-login-main-left {
     width: 700px;
   }
 }
-@media(min-width:768px) and (max-width:991px){
-  .ant-pro-login-divider{
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .ant-pro-login-divider {
     display: none;
   }
+
   .login-media(400px)
 }
-@media screen and (max-width:767px) {
+
+@media screen and (max-width: 767px) {
   .login-media(350px);
 
-  .ant-pro-login-divider{
+  .ant-pro-login-divider {
     display: none;
   }
 }

@@ -30,3 +30,13 @@ export function queryUserMaskBindInfoApi() {
     method: 'post',
   })
 }
+
+export function getAllValidUserBaseInfoApi() {
+  return request({
+    url: '/api/user/getAllValidUserBaseInfo',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8',
+    },
+    method: 'post',
+  })
+}

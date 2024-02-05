@@ -6,7 +6,7 @@ import dayjs from 'dayjs'
 import { getListApi } from '~@/api/list/basic-list'
 import VirtualList from '@/components/virtual-list/index.vue'
 
-// import VirtualListItem from '@/components/virtual-list-item/index.vue'
+// import VirtualListItem from '@/components/virtual-list-item/case-list.vue'
 
 const workData = ref([
   {

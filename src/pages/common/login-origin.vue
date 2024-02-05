@@ -1,7 +1,7 @@
 <!--<script setup>-->
 <!--import { AlipayCircleFilled, LockOutlined, MobileOutlined, TaobaoCircleFilled, UserOutlined, WeiboCircleFilled } from '@ant-design/icons-vue'-->
 <!--import { AxiosError } from 'axios'-->
-<!--import GlobalLayoutFooter from '~/layouts/components/global-footer/index.vue'-->
+<!--import GlobalLayoutFooter from '~/layouts/components/global-footer/case-list.vue'-->
 <!--import { loginApi } from '~/api/common/login.js'-->
 <!--import { getQueryParam } from '~/utils/tools'-->
 
